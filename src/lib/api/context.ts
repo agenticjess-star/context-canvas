@@ -140,5 +140,7 @@ export async function getContextPage(slug: string) {
     .eq('page_id', page.id)
     .order('sort_order');
 
-  return { ...page, sources: sources || [] };
+  // Strip user_id from public response to avoid leaking identity
+  const { user_id, ...publicPage } = page;
+  return { ...publicPage, sources: sources || [] };
 }
