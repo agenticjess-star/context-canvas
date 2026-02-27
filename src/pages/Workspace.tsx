@@ -518,10 +518,10 @@ const Workspace = () => {
         <Button
           className="w-full h-12 rounded-xl gap-2 text-[15px] font-semibold"
           onClick={handleGenerate}
-          disabled={sources.length === 0}
+          disabled={sources.length === 0 || generating}
         >
-          <Sparkles className="h-4 w-4" />
-          Generate Context URL
+          {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {generating ? "Generating…" : "Generate Context URL"}
         </Button>
       </div>
     </div>
