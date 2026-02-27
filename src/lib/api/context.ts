@@ -36,7 +36,7 @@ interface CreatePageParams {
     content: string;
     file?: File;
   }>;
-  expiresIn?: string; // '1h', '1d', '7d', '30d', 'never'
+  expiresIn?: string;
 }
 
 function getExpiryDate(expiresIn?: string): string | null {
@@ -54,20 +54,23 @@ function getExpiryDate(expiresIn?: string): string | null {
 export async function createContextPage(params: CreatePageParams): Promise<string> {
   const expiresAt = getExpiryDate(params.expiresIn);
 
-  // Create the page
+  // Get current user if authenticated
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id ?? null;
+
   const { data: page, error: pageError } = await supabase
     .from('context_pages')
     .insert({
       title: params.title || 'Untitled',
       description: params.description || '',
       expires_at: expiresAt,
+      user_id: userId,
     })
     .select('id, slug')
     .single();
 
   if (pageError || !page) throw new Error(pageError?.message || 'Failed to create page');
 
-  // Process sources — scrape URLs, upload files
   const processedSources = await Promise.all(
     params.sources.map(async (src, i) => {
       let content = src.content;
@@ -84,7 +87,6 @@ export async function createContextPage(params: CreatePageParams): Promise<strin
         try {
           const url = await uploadFile(src.file, page.id);
           filePath = url;
-          // For text-based files, read content
           if (src.file.type.startsWith('text/') || src.file.name.endsWith('.md') || src.file.name.endsWith('.txt')) {
             content = await src.file.text();
           } else {
@@ -106,7 +108,6 @@ export async function createContextPage(params: CreatePageParams): Promise<strin
     })
   );
 
-  // Insert all sources
   const { error: srcError } = await supabase
     .from('context_sources')
     .insert(processedSources);
@@ -125,10 +126,8 @@ export async function getContextPage(slug: string) {
 
   if (pageError || !page) return null;
 
-  // Check expiry
   if (page.expires_at && new Date(page.expires_at) < new Date()) return null;
 
-  // Increment view count
   await supabase
     .from('context_pages')
     .update({ view_count: page.view_count + 1 })
@@ -140,7 +139,7 @@ export async function getContextPage(slug: string) {
     .eq('page_id', page.id)
     .order('sort_order');
 
-  // Strip user_id from public response to avoid leaking identity
+  // Strip user_id from public response
   const { user_id, ...publicPage } = page;
   return { ...publicPage, sources: sources || [] };
 }
