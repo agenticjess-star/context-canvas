@@ -203,10 +203,10 @@ const Workspace = () => {
             size="sm"
             className="rounded-full px-5 gap-2 shadow-[0_1px_2px_hsl(230_80%_56%/0.3)]"
             onClick={handleGenerate}
-            disabled={sources.length === 0}
+            disabled={sources.length === 0 || generating}
           >
-            <Sparkles className="h-3.5 w-3.5" />
-            Generate URL
+            {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            {generating ? "Generating…" : "Generate URL"}
           </Button>
         </div>
       </header>
