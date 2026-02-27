@@ -482,11 +482,11 @@ const Workspace = () => {
                 <Button
                   className="w-full rounded-xl gap-2"
                   onClick={handleGenerate}
-                  disabled={sources.length === 0}
+                  disabled={sources.length === 0 || generating}
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Generate URL
-                  <ChevronRight className="h-3.5 w-3.5 ml-auto" />
+                  {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                  {generating ? "Generating…" : "Generate URL"}
+                  {!generating && <ChevronRight className="h-3.5 w-3.5 ml-auto" />}
                 </Button>
               </div>
 
