@@ -174,7 +174,7 @@ const Index = () => {
             >
               <p className="text-xs text-muted-foreground mb-1">AI-ready</p>
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <div className="w-2 h-2 rounded-full bg-primary" />
                 <p className="text-sm font-semibold">Optimized</p>
               </div>
             </motion.div>
