@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       context_pages: {
         Row: {
+          canvas_slug: string | null
           created_at: string
           description: string | null
           expires_at: string | null
@@ -26,6 +27,7 @@ export type Database = {
           view_count: number
         }
         Insert: {
+          canvas_slug?: string | null
           created_at?: string
           description?: string | null
           expires_at?: string | null
@@ -36,6 +38,7 @@ export type Database = {
           view_count?: number
         }
         Update: {
+          canvas_slug?: string | null
           created_at?: string
           description?: string | null
           expires_at?: string | null
@@ -123,6 +126,42 @@ export type Database = {
         Update: {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vault_items: {
+        Row: {
+          content: string
+          created_at: string
+          file_path: string | null
+          file_size: number | null
+          id: string
+          label: string
+          mime_type: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          label: string
+          mime_type?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          label?: string
+          mime_type?: string | null
+          type?: string
           user_id?: string
         }
         Relationships: []

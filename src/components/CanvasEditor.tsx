@@ -81,12 +81,17 @@ const CanvasEditor = ({ backTo = "/dashboard" }: CanvasEditorProps) => {
     }
     setGenerating(true);
     try {
-      const slug = await createContextPage({
+      const result = await createContextPage({
         title: title || "Untitled",
         description,
         sources: sources.map((s) => ({ type: s.type, label: s.label, content: s.content, file: s.file })),
       });
-      navigate(`/c/${slug}`);
+      // Navigate to friendly URL if available, otherwise fallback
+      if (result.username && result.canvasSlug) {
+        navigate(`/@${result.username}/${result.canvasSlug}`);
+      } else {
+        navigate(`/c/${result.slug}`);
+      }
     } catch (e: any) {
       toast({ title: "Generation failed", description: e.message || "Something went wrong.", variant: "destructive" });
     } finally {

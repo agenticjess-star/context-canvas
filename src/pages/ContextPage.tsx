@@ -8,8 +8,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { getContextPage } from "@/lib/api/context";
-
+import { getContextPage, getContextPageByUsername } from "@/lib/api/context";
 const sourceIcons = {
   text: FileText,
   url: Link2,
@@ -17,7 +16,7 @@ const sourceIcons = {
 };
 
 const ContextPage = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, username, canvasSlug } = useParams<{ slug?: string; username?: string; canvasSlug?: string }>();
   const { toast } = useToast();
   const [page, setPage] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -25,12 +24,18 @@ const ContextPage = () => {
   const [copiedAI, setCopiedAI] = useState(false);
 
   useEffect(() => {
-    if (!slug) return;
-    getContextPage(slug).then((data) => {
+    const fetchPage = async () => {
+      let data = null;
+      if (username && canvasSlug) {
+        data = await getContextPageByUsername(username, canvasSlug);
+      } else if (slug) {
+        data = await getContextPage(slug);
+      }
       setPage(data);
       setLoading(false);
-    });
-  }, [slug]);
+    };
+    fetchPage();
+  }, [slug, username, canvasSlug]);
 
   const copyUrl = () => {
     navigator.clipboard.writeText(window.location.href);

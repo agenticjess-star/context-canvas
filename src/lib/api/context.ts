@@ -27,6 +27,16 @@ export async function uploadFile(file: File, pageId: string): Promise<string> {
   return urlData.publicUrl;
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 60)
+    .replace(/^-|-$/g, '');
+}
+
 interface CreatePageParams {
   title: string;
   description: string;
@@ -51,12 +61,25 @@ function getExpiryDate(expiresIn?: string): string | null {
   return new Date(now.getTime() + (map[expiresIn] || 0)).toISOString();
 }
 
-export async function createContextPage(params: CreatePageParams): Promise<string> {
+export async function createContextPage(params: CreatePageParams): Promise<{ slug: string; username: string | null; canvasSlug: string | null }> {
   const expiresAt = getExpiryDate(params.expiresIn);
 
-  // Get current user if authenticated
   const { data: { session } } = await supabase.auth.getSession();
   const userId = session?.user?.id ?? null;
+
+  // Generate canvas_slug from title
+  const canvasSlug = slugify(params.title || 'untitled') || 'untitled';
+
+  // Get username if authenticated
+  let username: string | null = null;
+  if (userId) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', userId)
+      .single();
+    username = profile?.username || null;
+  }
 
   const { data: page, error: pageError } = await supabase
     .from('context_pages')
@@ -65,8 +88,9 @@ export async function createContextPage(params: CreatePageParams): Promise<strin
       description: params.description || '',
       expires_at: expiresAt,
       user_id: userId,
+      canvas_slug: userId ? canvasSlug : null,
     })
-    .select('id, slug')
+    .select('id, slug, canvas_slug')
     .single();
 
   if (pageError || !page) throw new Error(pageError?.message || 'Failed to create page');
@@ -114,7 +138,7 @@ export async function createContextPage(params: CreatePageParams): Promise<strin
 
   if (srcError) throw new Error(srcError.message);
 
-  return page.slug;
+  return { slug: page.slug, username, canvasSlug: page.canvas_slug };
 }
 
 export async function getContextPage(slug: string) {
@@ -125,7 +149,6 @@ export async function getContextPage(slug: string) {
     .single();
 
   if (pageError || !page) return null;
-
   if (page.expires_at && new Date(page.expires_at) < new Date()) return null;
 
   await supabase
@@ -139,7 +162,41 @@ export async function getContextPage(slug: string) {
     .eq('page_id', page.id)
     .order('sort_order');
 
-  // Strip user_id from public response
+  const { user_id, ...publicPage } = page;
+  return { ...publicPage, sources: sources || [] };
+}
+
+export async function getContextPageByUsername(username: string, canvasSlug: string) {
+  // Look up user by username
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('username', username)
+    .single();
+
+  if (!profile) return null;
+
+  const { data: page } = await supabase
+    .from('context_pages')
+    .select('*')
+    .eq('user_id', profile.id)
+    .eq('canvas_slug', canvasSlug)
+    .single();
+
+  if (!page) return null;
+  if (page.expires_at && new Date(page.expires_at) < new Date()) return null;
+
+  await supabase
+    .from('context_pages')
+    .update({ view_count: page.view_count + 1 })
+    .eq('id', page.id);
+
+  const { data: sources } = await supabase
+    .from('context_sources')
+    .select('*')
+    .eq('page_id', page.id)
+    .order('sort_order');
+
   const { user_id, ...publicPage } = page;
   return { ...publicPage, sources: sources || [] };
 }
