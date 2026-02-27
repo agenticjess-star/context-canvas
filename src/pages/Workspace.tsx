@@ -110,7 +110,7 @@ const Workspace = () => {
     setSources((s) => s.filter((src) => src.id !== id));
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (sources.length === 0) {
       toast({
         title: "No sources added",
@@ -119,10 +119,28 @@ const Workspace = () => {
       });
       return;
     }
-    toast({
-      title: "Coming soon",
-      description: "Context generation will be available in Phase 2.",
-    });
+    setGenerating(true);
+    try {
+      const slug = await createContextPage({
+        title: title || "Untitled",
+        description,
+        sources: sources.map((s) => ({
+          type: s.type,
+          label: s.label,
+          content: s.content,
+          file: s.file,
+        })),
+      });
+      navigate(`/c/${slug}`);
+    } catch (e: any) {
+      toast({
+        title: "Generation failed",
+        description: e.message || "Something went wrong.",
+        variant: "destructive",
+      });
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, type: SourceType) => {
