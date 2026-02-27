@@ -10,12 +10,14 @@ import {
   Sparkles,
   GripVertical,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { createContextPage } from "@/lib/api/context";
 
 type SourceType = "text" | "url" | "file";
 
@@ -43,6 +45,7 @@ const Workspace = () => {
   const [tempText, setTempText] = useState("");
   const [tempUrl, setTempUrl] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const addSource = (type: SourceType) => {
     if (type === "text" && tempText.trim()) {
@@ -107,7 +110,7 @@ const Workspace = () => {
     setSources((s) => s.filter((src) => src.id !== id));
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (sources.length === 0) {
       toast({
         title: "No sources added",
@@ -116,10 +119,28 @@ const Workspace = () => {
       });
       return;
     }
-    toast({
-      title: "Coming soon",
-      description: "Context generation will be available in Phase 2.",
-    });
+    setGenerating(true);
+    try {
+      const slug = await createContextPage({
+        title: title || "Untitled",
+        description,
+        sources: sources.map((s) => ({
+          type: s.type,
+          label: s.label,
+          content: s.content,
+          file: s.file,
+        })),
+      });
+      navigate(`/c/${slug}`);
+    } catch (e: any) {
+      toast({
+        title: "Generation failed",
+        description: e.message || "Something went wrong.",
+        variant: "destructive",
+      });
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, type: SourceType) => {
@@ -182,10 +203,10 @@ const Workspace = () => {
             size="sm"
             className="rounded-full px-5 gap-2 shadow-[0_1px_2px_hsl(230_80%_56%/0.3)]"
             onClick={handleGenerate}
-            disabled={sources.length === 0}
+            disabled={sources.length === 0 || generating}
           >
-            <Sparkles className="h-3.5 w-3.5" />
-            Generate URL
+            {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            {generating ? "Generating…" : "Generate URL"}
           </Button>
         </div>
       </header>
@@ -461,11 +482,11 @@ const Workspace = () => {
                 <Button
                   className="w-full rounded-xl gap-2"
                   onClick={handleGenerate}
-                  disabled={sources.length === 0}
+                  disabled={sources.length === 0 || generating}
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Generate URL
-                  <ChevronRight className="h-3.5 w-3.5 ml-auto" />
+                  {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                  {generating ? "Generating…" : "Generate URL"}
+                  {!generating && <ChevronRight className="h-3.5 w-3.5 ml-auto" />}
                 </Button>
               </div>
 
@@ -497,10 +518,10 @@ const Workspace = () => {
         <Button
           className="w-full h-12 rounded-xl gap-2 text-[15px] font-semibold"
           onClick={handleGenerate}
-          disabled={sources.length === 0}
+          disabled={sources.length === 0 || generating}
         >
-          <Sparkles className="h-4 w-4" />
-          Generate Context URL
+          {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {generating ? "Generating…" : "Generate Context URL"}
         </Button>
       </div>
     </div>
