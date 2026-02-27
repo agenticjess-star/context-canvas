@@ -28,9 +28,9 @@ interface Source {
 }
 
 const sourceConfig = {
-  text: { icon: FileText, label: "Text / Notes", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20" },
-  url: { icon: Link2, label: "URL", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-900/20" },
-  file: { icon: Upload, label: "File", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
+  text: { icon: FileText, label: "Text / Notes", color: "text-primary", bg: "bg-primary/10" },
+  url: { icon: Link2, label: "URL", color: "text-primary", bg: "bg-primary/10" },
+  file: { icon: Upload, label: "File", color: "text-primary", bg: "bg-primary/10" },
 };
 
 const Workspace = () => {
