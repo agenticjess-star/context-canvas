@@ -45,6 +45,7 @@ const Workspace = () => {
   const [tempText, setTempText] = useState("");
   const [tempUrl, setTempUrl] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const addSource = (type: SourceType) => {
     if (type === "text" && tempText.trim()) {
