@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
+import VaultPage from "./pages/VaultPage";
+import ProfilePage from "./pages/ProfilePage";
 import CanvasEditor from "./components/CanvasEditor";
 import ContextPage from "./pages/ContextPage";
 import NotFound from "./pages/NotFound";
@@ -26,9 +28,12 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/vault" element={<VaultPage />} />
+            <Route path="/dashboard/profile" element={<ProfilePage />} />
             <Route path="/dashboard/new" element={<CanvasEditor backTo="/dashboard" />} />
             <Route path="/workspace" element={<Navigate to="/dashboard" replace />} />
             <Route path="/c/:slug" element={<ContextPage />} />
+            <Route path="/@:username/:canvasSlug" element={<ContextPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
