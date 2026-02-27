@@ -8,8 +8,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { getContextPage } from "@/lib/api/context";
-
+import { getContextPage, getContextPageByUsername } from "@/lib/api/context";
 const sourceIcons = {
   text: FileText,
   url: Link2,
