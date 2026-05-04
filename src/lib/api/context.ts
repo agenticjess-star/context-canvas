@@ -1,5 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
+import { getSubscriptionState } from '@/lib/subscription';
+
 export async function scrapeUrl(url: string): Promise<{ markdown: string; title: string }> {
   const { data, error } = await supabase.functions.invoke('scrape-url', {
     body: { url },
@@ -79,6 +81,17 @@ export async function createContextPage(params: CreatePageParams): Promise<{ slu
       .eq('id', userId)
       .single();
     username = profile?.username || null;
+  }
+
+
+  if (userId) {
+    const [{ count }, sub] = await Promise.all([
+      supabase.from('context_pages').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      getSubscriptionState(),
+    ]);
+    if ((count || 0) >= sub.limit) {
+      throw new Error(`Plan limit reached (${sub.limit} canvases). Upgrade to continue.`);
+    }
   }
 
   const { data: page, error: pageError } = await supabase
