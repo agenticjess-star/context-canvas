@@ -16,14 +16,20 @@ interface AppLayoutProps {
   children: React.ReactNode;
   activeTab?: string;
   onNewCanvas?: () => void;
+  isGuest?: boolean;
 }
 
-const AppLayout = ({ children, activeTab = 'canvases', onNewCanvas }: AppLayoutProps) => {
+const AppLayout = ({ children, activeTab = 'canvases', onNewCanvas, isGuest = false }: AppLayoutProps) => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { signOut, exitGuestMode } = useAuth();
   const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
+    if (isGuest) {
+      exitGuestMode();
+      navigate('/');
+      return;
+    }
     await signOut();
     navigate('/');
   };
@@ -39,6 +45,7 @@ const AppLayout = ({ children, activeTab = 'canvases', onNewCanvas }: AppLayoutP
                 <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
               </div>
               <span className="font-bold tracking-tight text-sm">EasyContext</span>
+              {isGuest && <span className="text-[10px] px-2 py-0.5 rounded-full border border-primary/30 bg-primary/10 text-primary">Preview mode</span>}
             </Link>
 
             <nav className="flex items-center gap-1 bg-muted/60 rounded-xl p-1">
@@ -47,7 +54,7 @@ const AppLayout = ({ children, activeTab = 'canvases', onNewCanvas }: AppLayoutP
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => navigate(tab.path)}
+                    onClick={() => !isGuest || tab.id !== 'profile' ? navigate(tab.path) : null}
                     className={`relative flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                       isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                     }`}
@@ -78,6 +85,7 @@ const AppLayout = ({ children, activeTab = 'canvases', onNewCanvas }: AppLayoutP
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-lg"
               >
                 <LogOut className="h-3 w-3" />
+                {isGuest && <span>Exit preview</span>}
               </button>
             </div>
           </div>
@@ -123,7 +131,7 @@ const AppLayout = ({ children, activeTab = 'canvases', onNewCanvas }: AppLayoutP
               return (
                 <button
                   key={tab.id}
-                  onClick={() => navigate(tab.path)}
+                  onClick={() => !isGuest || tab.id !== 'profile' ? navigate(tab.path) : null}
                   className={`relative flex flex-col items-center gap-1 px-4 py-2 transition-colors ${
                     isActive ? 'text-primary' : 'text-muted-foreground'
                   }`}
