@@ -15,10 +15,10 @@ const fadeUp = {
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, isGuest, enterGuestMode, loading } = useAuth();
 
   const handleGetStarted = () => {
-    navigate(user ? '/dashboard' : '/auth');
+    navigate(user || isGuest ? '/dashboard' : '/auth');
   };
 
   return (
@@ -26,6 +26,7 @@ const Index = () => {
       {/* ── Navigation ── */}
       <nav className="relative z-10 flex items-center justify-between px-6 lg:px-10 py-5 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
+          {isGuest && <span className="text-xs px-2 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary">Preview mode</span>}
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Sparkles className="h-4 w-4 text-primary-foreground" />
           </div>
@@ -44,11 +45,12 @@ const Index = () => {
               Log in
             </Button>
           )}
-          {!loading && user && (
+          {!loading && (user || isGuest) && (
             <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => navigate('/dashboard')}>
-              Dashboard
+              {isGuest ? 'Preview dashboard' : 'Dashboard'}
             </Button>
           )}
+          <Button variant="outline" size="sm" className="rounded-full px-5" onClick={() => { enterGuestMode(); navigate('/dashboard'); }}>Continue as guest</Button>
           <Button size="sm" className="rounded-full px-5" onClick={handleGetStarted}>
             Get started
           </Button>
@@ -222,6 +224,7 @@ const Index = () => {
       <footer className="border-t border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
+          {isGuest && <span className="text-xs px-2 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary">Preview mode</span>}
             <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
               <Sparkles className="h-3 w-3 text-primary-foreground" />
             </div>

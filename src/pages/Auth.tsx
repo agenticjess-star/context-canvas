@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { signIn, signUp, signInWithGoogle, user, loading: authLoading } = useAuth();
+  const { signIn, signUp, signInWithGoogle, user, isGuest, enterGuestMode, loading: authLoading } = useAuth();
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +18,7 @@ const Auth = () => {
   const { resetPassword } = useAuth();
 
   // Redirect if already logged in
-  if (!authLoading && user) {
+  if (!authLoading && (user || isGuest)) {
     navigate('/dashboard', { replace: true });
     return null;
   }
@@ -99,6 +99,10 @@ const Auth = () => {
             <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">or</span></div>
           </div>
         )}
+
+        <Button variant="secondary" className="w-full h-11 rounded-xl" onClick={() => { enterGuestMode(); navigate('/dashboard'); }}>
+          Continue as guest
+        </Button>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">

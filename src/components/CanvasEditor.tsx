@@ -12,6 +12,15 @@ import { useToast } from "@/hooks/use-toast";
 import { createContextPage } from "@/lib/api/context";
 import { useAuth } from "@/hooks/useAuth";
 
+const createGuestContextPage = async (params: any): Promise<{ slug: string; username: string | null; canvasSlug: string | null }> => {
+  const slug = crypto.randomUUID().slice(0, 8);
+  const storeKey = "easycontext_guest_canvases";
+  const canvases = JSON.parse(localStorage.getItem(storeKey) || "[]");
+  canvases.unshift({ id: crypto.randomUUID(), slug, canvas_slug: null, title: params.title || "Untitled", description: params.description || null, view_count: 0, created_at: new Date().toISOString(), expires_at: null });
+  localStorage.setItem(storeKey, JSON.stringify(canvases));
+  return { slug, username: null, canvasSlug: null };
+};
+
 type SourceType = "text" | "url" | "file";
 
 interface Source {
@@ -35,7 +44,7 @@ interface CanvasEditorProps {
 const CanvasEditor = ({ backTo = "/dashboard" }: CanvasEditorProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { isGuest } = useAuth();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [sources, setSources] = useState<Source[]>([]);
@@ -81,11 +90,12 @@ const CanvasEditor = ({ backTo = "/dashboard" }: CanvasEditorProps) => {
     }
     setGenerating(true);
     try {
-      const result = await createContextPage({
+      const payload = {
         title: title || "Untitled",
         description,
         sources: sources.map((s) => ({ type: s.type, label: s.label, content: s.content, file: s.file })),
-      });
+      };
+      const result = isGuest ? await createGuestContextPage(payload) : await createContextPage(payload);
       // Navigate to friendly URL if available, otherwise fallback
       if (result.username && result.canvasSlug) {
         navigate(`/@${result.username}/${result.canvasSlug}`);
@@ -135,7 +145,7 @@ const CanvasEditor = ({ backTo = "/dashboard" }: CanvasEditorProps) => {
           </div>
           <Button size="sm" className="rounded-full px-5 gap-2 shadow-[0_1px_2px_hsl(230_80%_56%/0.3)]" onClick={handleGenerate} disabled={sources.length === 0 || generating}>
             {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-            {generating ? "Generating…" : "Generate URL"}
+            {generating ? "Generating…" : isGuest ? "Save local preview" : "Generate URL"}
           </Button>
         </div>
       </header>
@@ -287,7 +297,7 @@ const CanvasEditor = ({ backTo = "/dashboard" }: CanvasEditorProps) => {
                 <div className="h-px bg-border" />
                 <Button className="w-full rounded-xl gap-2" onClick={handleGenerate} disabled={sources.length === 0 || generating}>
                   {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                  {generating ? "Generating…" : "Generate URL"}
+                  {generating ? "Generating…" : isGuest ? "Save local preview" : "Generate URL"}
                   {!generating && <ChevronRight className="h-3.5 w-3.5 ml-auto" />}
                 </Button>
               </div>
