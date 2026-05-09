@@ -33,8 +33,8 @@ const Index = () => {
           <span className="text-lg font-bold tracking-tight">EasyContext</span>
         </div>
         <div className="hidden md:flex items-center gap-1 bg-secondary/60 rounded-full px-1.5 py-1 border border-border">
-          {["How it works", "Features"].map((item) => (
-            <button key={item} className="px-4 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-full">
+          {["How it works", "Features", "Pricing"].map((item) => (
+            <button key={item} onClick={() => item === "Pricing" ? navigate("/pricing") : undefined} className="px-4 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-full">
               {item}
             </button>
           ))}
