@@ -2,6 +2,16 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.25.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+type AppStatus = "inactive" | "trialing" | "active" | "past_due" | "canceled";
+
+const mapStripeStatus = (status: Stripe.Subscription.Status): AppStatus => {
+  if (status === "trialing") return "trialing";
+  if (status === "active") return "active";
+  if (status === "past_due" || status === "unpaid") return "past_due";
+  if (status === "canceled" || status === "incomplete_expired") return "canceled";
+  return "inactive";
+};
+
 serve(async (req) => {
   const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2024-04-10" });
   const sig = req.headers.get("stripe-signature")!;
@@ -16,10 +26,15 @@ serve(async (req) => {
     const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
     const userId = customer.metadata?.user_id;
     if (userId) {
+      const status = mapStripeStatus(subscription.status);
+      const plan = ["trialing", "active", "past_due"].includes(status) ? "pro" : "free";
+
       await supabase.from("subscriptions").upsert({
         user_id: userId,
         stripe_customer_id: customerId,
         stripe_subscription_id: subscription.id,
+        plan,
+        status,
         plan: "pro",
         status: subscription.status === "unpaid" ? "past_due" : subscription.status,
         current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),

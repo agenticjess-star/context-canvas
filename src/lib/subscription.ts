@@ -23,6 +23,15 @@ export async function getSubscriptionState(): Promise<SubscriptionState> {
     .eq('user_id', user.id)
     .maybeSingle();
 
+  const status = (data?.status as SubscriptionStatus) || 'inactive';
+  const hasProAccess = data?.plan === 'pro' && ['trialing', 'active', 'past_due'].includes(status);
+  const plan: Plan = hasProAccess ? 'pro' : 'free';
+
+  return {
+    plan,
+    status,
+    currentPeriodEnd: data?.current_period_end || null,
+    limit: hasProAccess ? PRO_CANVAS_LIMIT : FREE_CANVAS_LIMIT,
   const plan = data?.plan === 'pro' ? 'pro' : 'free';
   return {
     plan,
