@@ -11,6 +11,7 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+serve(async (req) => {
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
     global: { headers: { Authorization: req.headers.get("Authorization")! } },
   });
@@ -20,6 +21,11 @@ serve(async (req) => {
   const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2024-04-10" });
   const { data: sub } = await supabase.from("subscriptions").select("stripe_customer_id").eq("user_id", user.id).single();
   if (!sub?.stripe_customer_id) return new Response("No billing profile", { status: 400, headers: corsHeaders });
+  if (!user) return new Response("Unauthorized", { status: 401 });
+
+  const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2024-04-10" });
+  const { data: sub } = await supabase.from("subscriptions").select("stripe_customer_id").eq("user_id", user.id).single();
+  if (!sub?.stripe_customer_id) return new Response("No billing profile", { status: 400 });
 
   const session = await stripe.billingPortal.sessions.create({
     customer: sub.stripe_customer_id,
@@ -27,4 +33,5 @@ serve(async (req) => {
   });
 
   return Response.json({ url: session.url }, { headers: corsHeaders });
+  return Response.json({ url: session.url });
 });
