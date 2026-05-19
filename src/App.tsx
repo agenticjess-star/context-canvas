@@ -14,6 +14,8 @@ import CanvasEditor from "./components/CanvasEditor";
 import ContextPage from "./pages/ContextPage";
 import NotFound from "./pages/NotFound";
 import Pricing from "./pages/Pricing";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/vault" element={<VaultPage />} />

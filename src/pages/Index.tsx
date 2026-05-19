@@ -3,6 +3,7 @@ import { ArrowRight, FileText, Link2, Sparkles, Globe, Zap, Shield, Copy } from 
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import Footer from "@/components/Footer";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -21,44 +22,50 @@ const Index = () => {
     navigate(user || isGuest ? '/dashboard' : '/auth');
   };
 
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       {/* ── Navigation ── */}
       <nav className="relative z-10 flex items-center justify-between px-6 lg:px-10 py-5 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          {isGuest && <span className="text-xs px-2 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary">Preview mode</span>}
+        <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Sparkles className="h-4 w-4 text-primary-foreground" />
           </div>
           <span className="text-lg font-bold tracking-tight">EasyContext</span>
         </div>
         <div className="hidden md:flex items-center gap-1 bg-secondary/60 rounded-full px-1.5 py-1 border border-border">
-          {["How it works", "Features", "Pricing"].map((item) => (
-            <button key={item} onClick={() => item === "Pricing" ? navigate("/pricing") : undefined} className="px-4 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-full">
-              {item}
+          {[
+            { label: "How it works", action: () => scrollTo("how-it-works") },
+            { label: "Features", action: () => scrollTo("features") },
+            { label: "Pricing", action: () => navigate("/pricing") },
+          ].map((item) => (
+            <button key={item.label} onClick={item.action} className="px-4 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-full">
+              {item.label}
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-3">
-          {!loading && !user && (
-            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => navigate('/auth')}>
+        <div className="flex items-center gap-2">
+          {!loading && !user && !isGuest && (
+            <Button variant="ghost" size="sm" className="text-muted-foreground hidden sm:inline-flex" onClick={() => navigate('/auth')}>
               Log in
             </Button>
           )}
           {!loading && (user || isGuest) && (
             <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => navigate('/dashboard')}>
-              {isGuest ? 'Preview dashboard' : 'Dashboard'}
+              Dashboard
             </Button>
           )}
-          <Button variant="outline" size="sm" className="rounded-full px-5" onClick={() => { enterGuestMode(); navigate('/dashboard'); }}>Continue as guest</Button>
           <Button size="sm" className="rounded-full px-5" onClick={handleGetStarted}>
-            Get started
+            Get started free
           </Button>
         </div>
       </nav>
 
       {/* ── Hero ── */}
-      <section className="relative pt-16 sm:pt-24 pb-32 px-6">
+      <section className="relative pt-20 sm:pt-28 pb-32 px-6">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-primary/5 blur-[120px]" />
         </div>
@@ -73,7 +80,7 @@ const Index = () => {
 
           <motion.h1 initial="hidden" animate="visible" variants={fadeUp} custom={1} className="text-4xl sm:text-5xl md:text-[3.5rem] lg:text-[4rem] font-extrabold leading-[1.08] tracking-tight mb-6 text-balance">
             One URL. All your context.{" "}
-            <span className="text-primary">Better AI responses.</span>
+            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Better AI responses.</span>
           </motion.h1>
 
           <motion.p initial="hidden" animate="visible" variants={fadeUp} custom={2} className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
@@ -82,14 +89,18 @@ const Index = () => {
           </motion.p>
 
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button size="lg" className="h-12 px-8 text-[15px] font-semibold rounded-full shadow-[0_1px_2px_hsl(230_80%_56%/0.3),0_8px_24px_hsl(230_80%_56%/0.15)]" onClick={handleGetStarted}>
+            <Button size="lg" className="h-12 px-8 text-[15px] font-semibold rounded-full shadow-[0_1px_2px_hsl(var(--primary)/0.3),0_8px_24px_hsl(var(--primary)/0.15)]" onClick={handleGetStarted}>
               Start building context
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button variant="outline" size="lg" className="h-12 px-8 text-[15px] rounded-full">
+            <Button variant="outline" size="lg" className="h-12 px-8 text-[15px] rounded-full" onClick={() => scrollTo("how-it-works")}>
               See how it works
             </Button>
           </motion.div>
+
+          <motion.p initial="hidden" animate="visible" variants={fadeUp} custom={4} className="mt-4 text-xs text-muted-foreground/60">
+            Free to start · No credit card required
+          </motion.p>
         </div>
 
         {/* ── Floating Preview Cards ── */}
@@ -99,12 +110,12 @@ const Index = () => {
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-destructive/60" />
-                  <div className="w-3 h-3 rounded-full bg-accent/60" />
-                  <div className="w-3 h-3 rounded-full bg-primary/40" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-400/60" />
+                  <div className="w-3 h-3 rounded-full bg-green-400/60" />
                 </div>
                 <div className="flex-1 flex items-center gap-2 bg-muted rounded-lg px-4 py-2 text-sm text-muted-foreground">
                   <Globe className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">easycontext.me/c/a8f3k2m1</span>
+                  <span className="truncate">easycontext.me/@you/project-brief</span>
                   <Copy className="h-3.5 w-3.5 ml-auto shrink-0 opacity-50" />
                 </div>
               </div>
@@ -141,7 +152,7 @@ const Index = () => {
             <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 1.1 }} className="absolute -right-4 sm:-right-10 bottom-8 bg-card border border-border rounded-xl p-3 sm:p-4 shadow-[0_8px_32px_hsl(228_20%_10%/0.08)] hidden sm:block">
               <p className="text-xs text-muted-foreground mb-1">AI-ready</p>
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-primary" />
+                <div className="w-2 h-2 rounded-full bg-green-500" />
                 <p className="text-sm font-semibold">Optimized</p>
               </div>
             </motion.div>
@@ -150,7 +161,7 @@ const Index = () => {
       </section>
 
       {/* ── How it works ── */}
-      <section className="px-6 py-24 bg-muted/30">
+      <section id="how-it-works" className="px-6 py-24 bg-muted/30 scroll-mt-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm font-semibold text-primary mb-3 tracking-wide uppercase">How it works</p>
@@ -176,7 +187,7 @@ const Index = () => {
       </section>
 
       {/* ── Why EasyContext ── */}
-      <section className="px-6 py-24">
+      <section id="features" className="px-6 py-24 scroll-mt-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm font-semibold text-primary mb-3 tracking-wide uppercase">Why EasyContext</p>
@@ -184,7 +195,7 @@ const Index = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {[
-              { icon: Shield, title: "Unlisted by default", desc: "Your context pages aren't indexed or discoverable. Share only with who you choose." },
+              { icon: Shield, title: "Private by default", desc: "Your context pages aren't indexed or discoverable. Share only with who you choose." },
               { icon: Zap, title: "Instant parsing", desc: "URLs are scraped, PDFs are extracted, text is cleaned — in seconds, not minutes." },
               { icon: Globe, title: "Works everywhere", desc: "ChatGPT, Claude, Gemini, Perplexity — any tool that can read a URL gets your full context." },
               { icon: Copy, title: "One link, all context", desc: "Stop juggling 5 tabs and 3 uploads. One URL replaces all of it." },
@@ -211,28 +222,21 @@ const Index = () => {
             <div className="relative">
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Ready to give AI your full context?</h2>
               <p className="text-muted-foreground mb-8 max-w-lg mx-auto">Create your free account and build your first context canvas in under a minute.</p>
-              <Button size="lg" className="h-12 px-8 text-[15px] font-semibold rounded-full shadow-[0_1px_2px_hsl(230_80%_56%/0.3),0_8px_24px_hsl(230_80%_56%/0.15)]" onClick={handleGetStarted}>
-                Start for free
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Button size="lg" className="h-12 px-8 text-[15px] font-semibold rounded-full shadow-[0_1px_2px_hsl(var(--primary)/0.3),0_8px_24px_hsl(var(--primary)/0.15)]" onClick={handleGetStarted}>
+                  Start for free
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="lg" className="h-12 px-6 text-[15px] text-muted-foreground" onClick={() => { enterGuestMode(); navigate('/dashboard'); }}>
+                  or try as guest
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="border-t border-border">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-          {isGuest && <span className="text-xs px-2 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary">Preview mode</span>}
-            <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
-              <Sparkles className="h-3 w-3 text-primary-foreground" />
-            </div>
-            <span className="text-sm font-semibold">EasyContext</span>
-          </div>
-          <p className="text-sm text-muted-foreground">Ship context, not copy-paste.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
