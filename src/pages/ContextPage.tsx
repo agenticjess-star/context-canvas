@@ -114,7 +114,7 @@ const ContextPage = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>{page.title} — EasyContext</title>
-        <meta name="robots" content="noindex, nofollow" />
+        <meta name="robots" content="index, follow" />
         <meta name="description" content={page.description || `EasyContext page with ${page.sources?.length || 0} sources`} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
