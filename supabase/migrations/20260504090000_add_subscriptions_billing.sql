@@ -4,7 +4,6 @@ create type public.subscription_status as enum ('inactive', 'trialing', 'active'
 create table if not exists public.subscriptions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references auth.users(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
   stripe_customer_id text unique,
   stripe_subscription_id text unique,
   plan public.subscription_plan not null default 'free',

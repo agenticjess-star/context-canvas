@@ -32,11 +32,5 @@ export async function getSubscriptionState(): Promise<SubscriptionState> {
     status,
     currentPeriodEnd: data?.current_period_end || null,
     limit: hasProAccess ? PRO_CANVAS_LIMIT : FREE_CANVAS_LIMIT,
-  const plan = data?.plan === 'pro' ? 'pro' : 'free';
-  return {
-    plan,
-    status: (data?.status as SubscriptionStatus) || 'inactive',
-    currentPeriodEnd: data?.current_period_end || null,
-    limit: plan === 'pro' ? PRO_CANVAS_LIMIT : FREE_CANVAS_LIMIT,
   };
 }

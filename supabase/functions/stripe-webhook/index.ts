@@ -35,8 +35,6 @@ serve(async (req) => {
         stripe_subscription_id: subscription.id,
         plan,
         status,
-        plan: "pro",
-        status: subscription.status === "unpaid" ? "past_due" : subscription.status,
         current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
       }, { onConflict: "user_id" });
     }
