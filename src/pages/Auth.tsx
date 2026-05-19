@@ -10,14 +10,12 @@ import { useToast } from '@/hooks/use-toast';
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { signIn, signUp, signInWithGoogle, user, isGuest, enterGuestMode, loading: authLoading } = useAuth();
+  const { signIn, signUp, signInWithGoogle, user, isGuest, enterGuestMode, loading: authLoading, resetPassword } = useAuth();
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { resetPassword } = useAuth();
 
-  // Redirect if already logged in
   if (!authLoading && (user || isGuest)) {
     navigate('/dashboard', { replace: true });
     return null;
@@ -38,8 +36,9 @@ const Auth = () => {
         await signIn(email, password);
         navigate('/dashboard');
       }
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An error occurred';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -48,8 +47,9 @@ const Auth = () => {
   const handleGoogle = async () => {
     try {
       await signInWithGoogle();
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An error occurred';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
     }
   };
 
@@ -58,9 +58,8 @@ const Auth = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm space-y-8"
+        className="w-full max-w-sm space-y-6"
       >
-        {/* Logo */}
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
             <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
@@ -76,7 +75,6 @@ const Auth = () => {
           </p>
         </div>
 
-        {/* Google */}
         {mode !== 'forgot' && (
           <Button
             variant="outline"
@@ -100,11 +98,6 @@ const Auth = () => {
           </div>
         )}
 
-        <Button variant="secondary" className="w-full h-11 rounded-xl" onClick={() => { enterGuestMode(); navigate('/dashboard'); }}>
-          Continue as guest
-        </Button>
-
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
             <div className="relative">
@@ -150,7 +143,6 @@ const Auth = () => {
           </Button>
         </form>
 
-        {/* Toggle mode */}
         <p className="text-center text-sm text-muted-foreground">
           {mode === 'signin' ? (
             <>Don't have an account?{' '}<button onClick={() => setMode('signup')} className="text-primary font-medium hover:underline">Sign up</button></>
@@ -158,6 +150,18 @@ const Auth = () => {
             <>Already have an account?{' '}<button onClick={() => setMode('signin')} className="text-primary font-medium hover:underline">Sign in</button></>
           )}
         </p>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+          <div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">or</span></div>
+        </div>
+
+        <button
+          onClick={() => { enterGuestMode(); navigate('/dashboard'); }}
+          className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+        >
+          Continue as guest &rarr;
+        </button>
       </motion.div>
     </div>
   );
